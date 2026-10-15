@@ -26,8 +26,12 @@ MUI и breakpoints темы. Обеспечивать читаемость, уд
 горизонтального скролла страницы. При изменении UI проверять мобильный и desktop-размеры.
 
 Основа приложения использует Vite/Vitest, Redux Toolkit, React Router и тему MUI.
-Zod установлен для будущих форм; RTK Query входит в Redux Toolkit, API endpoints
-ещё не определены. Проверки: `npm run typecheck`, `npm test`, `npm run build`.
+Авторизация использует Яндекс OAuth и HttpOnly-сессию users API. Профиль и выход
+подключены через RTK Query; Zod проверяет контракт профиля.
+Все API-запросы интерфейса выполнять через хуки RTK Query; не использовать
+прямой fetch/axios или запросы из useEffect. OAuth запускается навигацией браузера
+на `/auth/yandex/login`. Секреты и токены доступны только backend.
+Проверки: `npm run typecheck`, `npm test`, `npm run build`.
 
 Production упакован в Docker: `dockerfile`, `compose.yaml`, `docker/nginx.conf`.
 Проверять изменения упаковки через `docker compose config` и, при доступном Docker,

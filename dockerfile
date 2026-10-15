@@ -7,11 +7,13 @@ RUN npm ci
 COPY index.html tsconfig.json vite.config.ts ./
 COPY public ./public
 COPY src ./src
+COPY tooling ./tooling
 RUN npm run build
 
 FROM nginx:stable-alpine AS runtime
 
-COPY docker/nginx.conf /etc/nginx/conf.d/default.conf
+ENV USERS_API_ORIGIN=http://users:8080
+COPY docker/nginx.conf /etc/nginx/templates/default.conf.template
 COPY --from=build /app/dist /usr/share/nginx/html
 
 EXPOSE 80

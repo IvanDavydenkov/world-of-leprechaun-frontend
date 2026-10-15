@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link as RouterLink } from "react-router-dom";
+import { Link as RouterLink, useLocation } from "react-router-dom";
 import {
   Box,
   Button,
@@ -11,8 +11,10 @@ import {
   Typography,
 } from "@mui/material";
 import { BrandMark } from "../../../shared/ui/brand-mark";
+import { useGetSessionQuery } from "../../../entities/session";
+import { SignOutButton } from "../../../features/sign-out";
 
-const navigation = [
+const baseNavigation = [
   { label: "Обзор", href: "/" },
   { label: "Конфигурации", href: "/#configurations" },
   { label: "Подключение", href: "/#connection-guide" },
@@ -20,6 +22,17 @@ const navigation = [
 
 export function SiteHeader() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const { data, error } = useGetSessionQuery();
+  const session = !error ? data : undefined;
+  const { pathname, hash } = useLocation();
+  const navigation =
+    session?.role === "admin"
+      ? [
+          ...baseNavigation,
+          { label: "Пользователи", href: "/admin/users-list" },
+        ]
+      : baseNavigation;
+  const isActive = (href: string) => href === `${pathname}${hash}`;
 
   return (
     <Box
@@ -114,45 +127,54 @@ export function SiteHeader() {
             aria-label="Основная навигация"
             direction="row"
             spacing={1}
-            sx={{ display: { xs: "none", md: "flex" } }}
+            sx={{ display: session ? { xs: "none", lg: "flex" } : "none" }}
           >
-            {navigation.map(({ label, href }, index) => (
+            {navigation.map(({ label, href }) => (
               <Button
                 key={href}
                 href={href}
-                color={index === 0 ? "primary" : "inherit"}
-                aria-current={index === 0 ? "page" : undefined}
+                color={isActive(href) ? "primary" : "inherit"}
+                aria-current={isActive(href) ? "page" : undefined}
                 sx={{
-                  px: 2,
+                  px: 1.5,
                   minHeight: 44,
-                  color: index === 0 ? "primary.main" : "text.secondary",
-                  bgcolor: index === 0 ? "rgba(217,186,115,.08)" : undefined,
+                  color: isActive(href) ? "primary.main" : "text.secondary",
+                  bgcolor: isActive(href) ? "rgba(217,186,115,.08)" : undefined,
                 }}
               >
                 {label}
               </Button>
             ))}
           </Stack>
-          <Typography
-            sx={{
-              display: { xs: "none", md: "block" },
-              fontSize: 12,
-              letterSpacing: ".06em",
-              color: "text.secondary",
-              borderLeft: 1,
-              borderColor: "divider",
-              pl: 3,
-            }}
-          >
-            ЛИЧНЫЙ КАБИНЕТ
-          </Typography>
+          <Box sx={{ display: { xs: "none", md: "block" }, minWidth: 0 }}>
+            <Typography
+              sx={{
+                display: { xs: "none", md: "block" },
+                fontSize: 12,
+                letterSpacing: ".06em",
+                color: "text.secondary",
+                borderLeft: 1,
+                borderColor: "divider",
+                pl: 3,
+                maxWidth: 190,
+                whiteSpace: "nowrap",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+              }}
+            >
+              {session
+                ? session.display_name || "Пользователь"
+                : "ЛИЧНЫЙ КАБИНЕТ"}
+            </Typography>
+            {session && <SignOutButton />}
+          </Box>
           <IconButton
             aria-label="Открыть меню"
             aria-expanded={menuOpen}
             aria-controls={menuOpen ? "mobile-navigation" : undefined}
             onClick={() => setMenuOpen(true)}
             sx={{
-              display: { md: "none" },
+              display: session ? { lg: "none" } : "none",
               width: 44,
               height: 44,
               border: 1,
@@ -208,19 +230,25 @@ export function SiteHeader() {
           aria-label="Мобильная навигация"
           spacing={1}
         >
+          {session && (
+            <Typography sx={{ px: 2, overflowWrap: "anywhere" }}>
+              {session.display_name || "Пользователь"}
+            </Typography>
+          )}
           {navigation.map(({ label, href }) => (
             <Button
               key={href}
               href={href}
+              aria-current={isActive(href) ? "page" : undefined}
               onClick={() => setMenuOpen(false)}
               sx={{ justifyContent: "flex-start", minHeight: 52, px: 2 }}
             >
               {label}
             </Button>
           ))}
+          {session && <SignOutButton />}
         </Stack>
       </Drawer>
     </Box>
   );
 }
-

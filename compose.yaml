@@ -6,8 +6,18 @@ services:
     ports:
       - "${HTTP_BIND_ADDRESS:-0.0.0.0}:${HTTP_PORT:-80}:80"
     restart: unless-stopped
+    environment:
+      USERS_API_ORIGIN: ${USERS_API_ORIGIN:-http://users:8080}
+    networks:
+      - default
+      - backend
     logging:
       driver: json-file
       options:
         max-size: "10m"
         max-file: "3"
+
+networks:
+  backend:
+    external: true
+    name: ${BACKEND_NETWORK:-backend-word-of-leprechaun_default}
