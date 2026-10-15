@@ -47,6 +47,8 @@ beforeEach(() => {
         return new Response("[]", {
           headers: { "Content-Type": "application/json" },
         });
+      if (url.pathname === "/admin/vpn-servers")
+        return new Response("[]", { headers: { "Content-Type": "application/json" } });
       if (url.pathname === "/admin/users") {
         if (usersStatus === 401) sessionStatus = 401;
         return new Response(
@@ -113,7 +115,7 @@ it("показывает кабинет и имя после серверной 
   ).toBeInTheDocument();
   expect(screen.getByRole("banner")).toHaveTextContent(profile.display_name);
   expect(screen.getByRole("contentinfo")).toBeInTheDocument();
-  expect(requests[0].credentials).toBe("same-origin");
+  expect(requests[0].credentials).toBe("include");
 });
 
 it("направляет гостя на вход и предоставляет OAuth-ссылку", async () => {
@@ -187,7 +189,8 @@ it("объясняет отказ или прерывание OAuth и разр�
   );
 });
 
-it("открывает и закрывает мобильное меню", async () => {
+it("открывает и закрывает мобильное меню администратора", async () => {
+  profile.role = 'admin';
   const user = userEvent.setup();
   render(<App />);
   await screen.findByRole("heading", { level: 1 });
@@ -199,6 +202,29 @@ it("открывает и закрывает мобильное меню", async
   expect(
     await screen.findByRole("button", { name: "Открыть меню" }),
   ).toHaveAttribute("aria-expanded", "false");
+});
+
+it('обычному пользователю оставляет выход без навигации и бургера', async () => {
+  render(<App />);
+  await screen.findByRole('heading', { level: 1 });
+  expect(screen.queryByRole('button', { name: 'Открыть меню' })).not.toBeInTheDocument();
+  expect(screen.queryByRole('button', { name: 'Серверы' })).not.toBeInTheDocument();
+  expect(requests.some((request) => request.url.includes('/admin/vpn-servers'))).toBe(false);
+  expect(screen.queryByRole('navigation')).not.toBeInTheDocument();
+  expect(screen.getByRole('button', { name: 'Выйти' })).toBeInTheDocument();
+  expect(screen.queryByRole('link', { name: 'Конфигурации' })).not.toBeInTheDocument();
+  expect(screen.queryByRole('link', { name: 'Подключение' })).not.toBeInTheDocument();
+});
+
+it("администратор открывает управление серверами из шапки без предварительного запроса", async () => {
+  profile.role = "admin";
+  const user = userEvent.setup();
+  render(<App />);
+  await screen.findByRole("heading", { level: 1 });
+  expect(requests.some((request) => request.url.includes('/admin/vpn-servers'))).toBe(false);
+  await user.click(screen.getByRole("button", { name: "Серверы" }));
+  expect(await screen.findByRole("dialog", { name: "Серверы VPN" })).toBeInTheDocument();
+  expect(await screen.findByText("Серверы ещё не добавлены.")).toBeInTheDocument();
 });
 
 it("выходит через RTK mutation и очищает приватный кеш", async () => {

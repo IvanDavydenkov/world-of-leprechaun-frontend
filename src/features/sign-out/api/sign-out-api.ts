@@ -6,6 +6,7 @@ const signOutApi = baseApi.injectEndpoints({
       query: () => ({
         url: "auth/logout",
         method: "POST",
+        headers: { Accept: "application/json" },
         responseHandler: "text",
       }),
       transformResponse: () => undefined,

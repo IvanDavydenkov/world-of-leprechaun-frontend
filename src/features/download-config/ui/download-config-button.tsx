@@ -22,10 +22,11 @@ export function DownloadConfigButton({ config }: { config: PersonalConfig }) {
         onClick={() => {
           requestRef.current = download(config.id);
         }}
-        sx={{ minHeight: 44 }}
+        sx={{ height: 44, minWidth: 120, flexShrink: 0 }}
+        aria-busy={isLoading}
         aria-label={`Скачать ${config.name || "конфиг"}`}
       >
-        {isLoading ? "Загружаем…" : "Скачать .conf"}
+        Скачать
       </Button>
       {!config.download_available && (
         <Typography color="text.secondary" sx={{ fontSize: 12 }}>

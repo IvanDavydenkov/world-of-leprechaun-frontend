@@ -1,4 +1,4 @@
-# World of Leprechaun VPN
+# Мир лепреконов — VPN
 
 Frontend личного кабинета VPN для домена `worldofleprechaun.ru`.
 Цель — предоставить пользователю доступ к своим VPN-конфигурациям и их загрузке.
@@ -150,6 +150,8 @@ Frontend проверяется на синтетическом API/файле; 
 ## Пользователи администратора
 
 Роль `admin` в `/me` открывает пункт «Пользователи» в шапке и мобильном меню.
+У обычного пользователя нет навигации и бургера: в шапке остаются бренд и выход.
+Админское меню содержит «Личный кабинет» и «Пользователи», без якорных ссылок на разделы.
 Страница `/admin/users-list` показывает ID, имя и роль из `GET /admin/users` через
 RTK Query. Имя страницы отличается от API URL, чтобы прямое открытие не возвращало JSON.
 Пагинация — по 50 записей с cursor `after`; API не возвращает общее число пользователей.
@@ -191,6 +193,14 @@ upload/download. «Подробнее» раскрывает конфиги, в�
 
 ## Структура FSD
 
+Администратору доступна кнопка «Серверы» в шапке: список реестра, добавление (POST)
+и изменение (PATCH с expected_revision). Пустой пароль при редактировании сохраняет
+прежний. После конфликта требуется явно загрузить актуальную запись. Пароль
+не сохраняется в Redux/storage и очищается после отправки и закрытия формы.
+Контракт сверён с backend vpn-server-registry. Сохранение записи не устанавливает
+VPN и не переключает сервер: PUT/default и проверка подключения пока не реализованы
+в проверенной версии backend. Все запросы используют общую конфигурацию API.
+
 ```text
 src/
   app/        # композиция приложения, провайдеры, store, router, тема
@@ -207,3 +217,14 @@ src/
 Стандартные имена `README.md`, `AGENTS.md`, `SKILL.md` сохраняются.
 Пустые слои сохранены через `.gitkeep`; сегменты добавляются по необходимости.
 Ограничения и процесс разработки описаны в `openspec/config.yaml` и `AGENTS.md`.
+
+## Production: frontend + API subdomain
+Frontend: https://worldofleprechauns.ru; API: https://api.worldofleprechauns.ru.
+Copy production.env.example to a local .env for Docker. Build with docker compose --env-file .env up -d --build.
+VITE_API_ORIGIN is a public build-time value: rebuild after changing it. Never place secrets into VITE_*.
+Host Nginx terminates TLS and proxies the frontend to 127.0.0.1:8082 and users API to 127.0.0.1:8080.
+Set BACKEND_NETWORK to the actual backend Compose network name. Production does not use Vite.
+Backend must allow FRONTEND_ORIGIN=https://worldofleprechauns.ru and use Yandex callback https://api.worldofleprechauns.ru/auth/yandex/callback.
+Requests include HttpOnly cookies (credentials: include), OAuth navigates to the API, JSON logout returns 204.
+For development leave VITE_API_ORIGIN empty and run npm run dev (localhost:5173, Vite proxy -> 127.0.0.1:8080).
+Do not set production values in your development .env. Templates do not configure DNS/certificates or deploy services.

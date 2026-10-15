@@ -35,7 +35,7 @@ export function MyConfigs() {
         minWidth: 0,
         overflow: "hidden",
         backgroundImage: "none",
-        borderRadius: "24px",
+        borderRadius: "12px",
       }}
     >
       <Stack
@@ -105,7 +105,7 @@ export function MyConfigs() {
           <BrandMark sx={{ fontSize: 48, color: "primary.main" }} />
           <Typography
             component="h3"
-            sx={{ fontFamily: "Georgia, serif", fontSize: 26 }}
+            sx={{ fontSize: 26 }}
           >
             Пока нет активных конфигов
           </Typography>
@@ -173,7 +173,7 @@ export function MyConfigs() {
                     {config.id}
                   </Typography>
                 </Box>
-                <Box sx={{ minWidth: { sm: 170 }, maxWidth: { sm: 260 } }}>
+                <Box sx={{ width: { xs: "100%", sm: 170 }, flexShrink: 0 }}>
                   <DownloadConfigButton config={config} />
                 </Box>
               </Stack>

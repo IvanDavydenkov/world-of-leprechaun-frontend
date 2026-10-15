@@ -1,0 +1,2 @@
+- [x] Настроить URL API, OAuth и credentials, env-примеры и Docker.
+- [x] Выполнить typecheck, тесты и production build.

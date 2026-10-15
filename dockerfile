@@ -8,6 +8,8 @@ COPY index.html tsconfig.json vite.config.ts ./
 COPY public ./public
 COPY src ./src
 COPY tooling ./tooling
+ARG VITE_API_ORIGIN=https://api.worldofleprechauns.ru
+ENV VITE_API_ORIGIN=${VITE_API_ORIGIN}
 RUN npm run build
 
 FROM nginx:stable-alpine AS runtime

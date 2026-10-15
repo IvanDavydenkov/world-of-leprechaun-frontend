@@ -88,7 +88,7 @@ export function AdminUsersPage() {
             sx={{
               minWidth: 0,
               overflow: "hidden",
-              borderRadius: "20px",
+              borderRadius: "12px",
               backgroundImage: "none",
             }}
           >

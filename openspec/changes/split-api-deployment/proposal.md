@@ -1,0 +1,1 @@
+Одобрено пользователем: frontend https://worldofleprechauns.ru и API https://api.worldofleprechauns.ru на одном сервере за Nginx. Добавить VITE_API_ORIGIN на этапе сборки, credentials=include, OAuth navigation на API, сохранить localhost proxy. Секретов во frontend env нет.

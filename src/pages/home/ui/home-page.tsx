@@ -60,7 +60,7 @@ export function HomePage() {
             sx={{
               p: 3,
               border: "1px solid rgba(217,186,115,.22)",
-              borderRadius: 3,
+              borderRadius: "12px",
               background:
                 "linear-gradient(140deg, rgba(217,186,115,.07), rgba(217,186,115,.01))",
             }}
@@ -92,7 +92,7 @@ export function HomePage() {
                 <Stack key={text} direction="row" sx={{ gap: 1.5 }}>
                   <Typography
                     sx={{
-                      fontFamily: "Georgia, serif",
+
                       color: "primary.main",
                       fontSize: 15,
                     }}

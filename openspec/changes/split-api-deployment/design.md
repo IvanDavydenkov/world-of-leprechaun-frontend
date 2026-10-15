@@ -1,0 +1,1 @@
+shared/api владеет конфигурацией транспорта и OAuth URL; login использует публичный API shared/api. RTK Query сохраняется. Production cookie host-only на API; callback и CORS обеспечивает backend. JSON logout запрашивается через Accept application/json, backend отвечает 204. Docker принимает build arg; env меняется пересборкой. UI и адаптивная компоновка не меняются.

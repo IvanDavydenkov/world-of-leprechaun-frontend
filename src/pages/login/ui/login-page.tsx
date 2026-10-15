@@ -3,6 +3,8 @@ import { Navigate, useSearchParams } from "react-router-dom";
 import { useGetSessionQuery } from "../../../entities/session";
 import { BrandMark } from "../../../shared/ui/brand-mark";
 
+import { oauthLoginUrl } from "../../../shared/api";
+
 export function LoginPage() {
   const [params] = useSearchParams();
   const { data, error, isLoading, isFetching, refetch } = useGetSessionQuery(
@@ -22,7 +24,7 @@ export function LoginPage() {
         variant="outlined"
         sx={{
           p: { xs: 3, sm: 5 },
-          borderRadius: "24px",
+          borderRadius: "12px",
           backgroundImage: "none",
         }}
       >
@@ -66,7 +68,7 @@ export function LoginPage() {
           ) : (
             <Button
               component="a"
-              href="/auth/yandex/login"
+              href={oauthLoginUrl}
               variant="contained"
               size="large"
               sx={{ minHeight: 52 }}

@@ -37,7 +37,7 @@ export function CabinetLayout({ children }: PropsWithChildren) {
           <Stack direction="row" sx={{ alignItems: "center", gap: 1 }}>
             <BrandMark sx={{ fontSize: 18, color: "primary.main" }} />
             <Typography sx={{ fontSize: 12, color: "text.secondary" }}>
-              World of Leprechaun
+              Мир лепреконов
             </Typography>
           </Stack>
           <Typography

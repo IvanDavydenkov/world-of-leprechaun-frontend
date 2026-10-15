@@ -97,7 +97,7 @@ export function ManageUserConfigs({ user }: { user: UserOverview }) {
             sx: {
               m: { xs: 1, sm: 4 },
               width: { xs: "calc(100% - 16px)", sm: undefined },
-              borderRadius: "20px",
+              borderRadius: "12px",
               backgroundImage: 'none',
               bgcolor: 'background.paper',
             },

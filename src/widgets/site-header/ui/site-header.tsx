@@ -8,31 +8,28 @@ import {
   IconButton,
   Link,
   Stack,
+  SvgIcon,
+  Tooltip,
   Typography,
 } from "@mui/material";
 import { BrandMark } from "../../../shared/ui/brand-mark";
 import { useGetSessionQuery } from "../../../entities/session";
 import { SignOutButton } from "../../../features/sign-out";
+import { ManageVpnServers } from "../../../features/manage-vpn-servers";
 
-const baseNavigation = [
-  { label: "Обзор", href: "/" },
-  { label: "Конфигурации", href: "/#configurations" },
-  { label: "Подключение", href: "/#connection-guide" },
+const navigation = [
+  { label: "Личный кабинет", href: "/" },
+  { label: "Пользователи", href: "/admin/users-list" },
 ];
 
 export function SiteHeader() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [serversOpen, setServersOpen] = useState(false);
   const { data, error } = useGetSessionQuery();
   const session = !error ? data : undefined;
-  const { pathname, hash } = useLocation();
-  const navigation =
-    session?.role === "admin"
-      ? [
-          ...baseNavigation,
-          { label: "Пользователи", href: "/admin/users-list" },
-        ]
-      : baseNavigation;
-  const isActive = (href: string) => href === `${pathname}${hash}`;
+  const { pathname } = useLocation();
+  const isAdmin = session?.role === "admin";
+  const isActive = (href: string) => href === pathname;
 
   return (
     <Box
@@ -70,13 +67,13 @@ export function SiteHeader() {
             alignItems: "center",
             justifyContent: "space-between",
             minHeight: { xs: 80, md: 100 },
-            gap: 2,
+            gap: { xs: isAdmin ? 1 : 2, lg: 2 },
           }}
         >
           <Link
             component={RouterLink}
             to="/"
-            aria-label="World of Leprechaun — главная"
+            aria-label="Мир лепреконов — главная"
             underline="none"
             color="text.primary"
             sx={{
@@ -100,53 +97,59 @@ export function SiteHeader() {
             >
               <BrandMark sx={{ fontSize: 32 }} />
             </Box>
-            <Box>
-              <Typography
-                sx={{
-                  fontSize: 10,
-                  letterSpacing: ".23em",
-                  color: "text.secondary",
-                  lineHeight: 1.5,
-                }}
-              >
-                WORLD OF
-              </Typography>
-              <Typography
-                sx={{
-                  fontFamily: "Georgia, serif",
-                  fontSize: { xs: 21, md: 25 },
-                  lineHeight: 1.15,
-                }}
-              >
-                Leprechaun<span style={{ color: "#d9ba73" }}>.</span>
-              </Typography>
-            </Box>
+            <Typography
+              sx={{
+                fontSize: { xs: 18, md: 22 },
+                fontWeight: 500,
+                lineHeight: 1.2,
+                maxWidth: { xs: isAdmin ? 100 : 140, sm: "none" },
+              }}
+            >
+              Мир лепреконов
+            </Typography>
           </Link>
-          <Stack
-            component="nav"
-            aria-label="Основная навигация"
-            direction="row"
-            spacing={1}
-            sx={{ display: session ? { xs: "none", lg: "flex" } : "none" }}
-          >
-            {navigation.map(({ label, href }) => (
+          {isAdmin && (
+            <Stack
+              component="nav"
+              aria-label="Основная навигация"
+              direction="row"
+              spacing={1}
+              sx={{ display: { xs: "none", lg: "flex" } }}
+            >
+              {navigation.map(({ label, href }) => (
+                <Button
+                  key={href}
+                  component={RouterLink}
+                  to={href}
+                  color={isActive(href) ? "primary" : "inherit"}
+                  aria-current={isActive(href) ? "page" : undefined}
+                  sx={{
+                    px: 1.5,
+                    minHeight: 44,
+                    color: isActive(href) ? "primary.main" : "text.secondary",
+                    bgcolor: isActive(href) ? "rgba(217,186,115,.08)" : undefined,
+                  }}
+                >
+                  {label}
+                </Button>
+              ))}
+            </Stack>
+          )}
+          {isAdmin && (
+            <Tooltip title="Серверы">
               <Button
-                key={href}
-                href={href}
-                color={isActive(href) ? "primary" : "inherit"}
-                aria-current={isActive(href) ? "page" : undefined}
-                sx={{
-                  px: 1.5,
-                  minHeight: 44,
-                  color: isActive(href) ? "primary.main" : "text.secondary",
-                  bgcolor: isActive(href) ? "rgba(217,186,115,.08)" : undefined,
-                }}
+                aria-label="Серверы"
+                onClick={() => setServersOpen(true)}
+                sx={{ minWidth: { xs: 44, lg: 110 }, height: 44, ml: "auto", flexShrink: 0, px: { xs: 1, lg: 2 } }}
               >
-                {label}
+                <SvgIcon sx={{ display: { xs: "block", lg: "none" } }}>
+                  <path d="M3 3h18v8H3V3zm2 2v4h14V5H5zm-2 8h18v8H3v-8zm2 2v4h14v-4H5zm2-9h2v2H7V6zm0 10h2v2H7v-2z" />
+                </SvgIcon>
+                <Box component="span" sx={{ display: { xs: "none", lg: "inline" } }}>Серверы</Box>
               </Button>
-            ))}
-          </Stack>
-          <Box sx={{ display: { xs: "none", md: "block" }, minWidth: 0 }}>
+            </Tooltip>
+          )}
+          <Box sx={{ display: isAdmin ? { xs: 'none', lg: 'block' } : session ? 'block' : { xs: 'none', md: 'block' }, minWidth: 0 }}>
             <Typography
               sx={{
                 display: { xs: "none", md: "block" },
@@ -168,87 +171,93 @@ export function SiteHeader() {
             </Typography>
             {session && <SignOutButton />}
           </Box>
-          <IconButton
-            aria-label="Открыть меню"
-            aria-expanded={menuOpen}
-            aria-controls={menuOpen ? "mobile-navigation" : undefined}
-            onClick={() => setMenuOpen(true)}
-            sx={{
-              display: session ? { lg: "none" } : "none",
-              width: 44,
-              height: 44,
-              border: 1,
-              borderColor: "divider",
-              borderRadius: 2,
-            }}
-          >
-            <Box
-              aria-hidden="true"
+          {isAdmin && (
+            <IconButton
+              aria-label="Открыть меню"
+              aria-expanded={menuOpen}
+              aria-controls={menuOpen ? "mobile-navigation" : undefined}
+              onClick={() => setMenuOpen(true)}
               sx={{
-                display: "grid",
-                gap: "5px",
-                "& span": {
-                  display: "block",
-                  width: 18,
-                  height: "1px",
-                  bgcolor: "text.primary",
-                },
+                display: { lg: "none" },
+                width: 44,
+                height: 44,
+                border: 1,
+                borderColor: "divider",
+                borderRadius: 2,
               }}
             >
-              <span />
-              <span />
-            </Box>
-          </IconButton>
+              <Box
+                aria-hidden="true"
+                sx={{
+                  display: "grid",
+                  gap: "5px",
+                  "& span": {
+                    display: "block",
+                    width: 18,
+                    height: "1px",
+                    bgcolor: "text.primary",
+                  },
+                }}
+              >
+                <span />
+                <span />
+              </Box>
+            </IconButton>
+          )}
         </Stack>
       </Container>
-      <Drawer
-        anchor="right"
-        open={menuOpen}
-        onClose={() => setMenuOpen(false)}
-        slotProps={{
-          paper: {
-            sx: { width: "min(320px, 90vw)", p: 3, backgroundImage: "none" },
-          },
-        }}
-      >
-        <Stack
-          direction="row"
-          sx={{ justifyContent: "space-between", alignItems: "center", mb: 4 }}
+      {isAdmin && serversOpen && <ManageVpnServers onClose={() => setServersOpen(false)} />}
+      {isAdmin && (
+        <Drawer
+          anchor="right"
+          open={menuOpen}
+          onClose={() => setMenuOpen(false)}
+          slotProps={{
+            paper: {
+              sx: { width: "min(320px, 90vw)", p: 3, backgroundImage: "none" },
+            },
+          }}
         >
-          <Typography variant="h6">Навигация</Typography>
-          <IconButton
-            aria-label="Закрыть меню"
-            onClick={() => setMenuOpen(false)}
-            sx={{ width: 44, height: 44 }}
+          <Stack
+            direction="row"
+            sx={{ justifyContent: "space-between", alignItems: "center", mb: 4 }}
           >
-            ×
-          </IconButton>
-        </Stack>
-        <Stack
-          id="mobile-navigation"
-          component="nav"
-          aria-label="Мобильная навигация"
-          spacing={1}
-        >
-          {session && (
-            <Typography sx={{ px: 2, overflowWrap: "anywhere" }}>
-              {session.display_name || "Пользователь"}
-            </Typography>
-          )}
-          {navigation.map(({ label, href }) => (
-            <Button
-              key={href}
-              href={href}
-              aria-current={isActive(href) ? "page" : undefined}
+            <Typography variant="h6">Навигация</Typography>
+            <IconButton
+              aria-label="Закрыть меню"
               onClick={() => setMenuOpen(false)}
-              sx={{ justifyContent: "flex-start", minHeight: 52, px: 2 }}
+              sx={{ width: 44, height: 44 }}
             >
-              {label}
-            </Button>
-          ))}
-          {session && <SignOutButton />}
-        </Stack>
-      </Drawer>
+              ×
+            </IconButton>
+          </Stack>
+          <Stack
+            id="mobile-navigation"
+            component="nav"
+            aria-label="Мобильная навигация"
+            spacing={1}
+          >
+            {session && (
+              <Typography sx={{ px: 2, overflowWrap: "anywhere" }}>
+                {session.display_name || "Пользователь"}
+              </Typography>
+            )}
+            {navigation.map(({ label, href }) => (
+              <Button
+                key={href}
+                component={RouterLink}
+                to={href}
+                aria-current={isActive(href) ? "page" : undefined}
+                onClick={() => setMenuOpen(false)}
+                sx={{ justifyContent: "flex-start", minHeight: 52, px: 2 }}
+              >
+                {label}
+              </Button>
+            ))}
+            {session && <SignOutButton />}
+          </Stack>
+        </Drawer>
+      )}
     </Box>
   );
 }
