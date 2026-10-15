@@ -1,0 +1,17 @@
+import SvgIcon from "@mui/material/SvgIcon";
+import type { SvgIconProps } from "@mui/material/SvgIcon";
+
+export function BrandMark(props: SvgIconProps) {
+  return (
+    <SvgIcon viewBox="0 0 40 40" {...props}>
+      <path d="M20 19C5 17 9 3 16 5c3 0 4 3 4 3s1-3 4-3c7-2 11 12-4 14Zm-1 1C17 5 3 9 5 16c0 3 3 4 3 4s-3 1-3 4c-2 7 12 11 14-4Zm2 0c2-15 16-11 14-4 0 3-3 4-3 4s3 1 3 4c2 7-12 11-14-4Zm-1 2c-2 3-6 4-6 8 0 4 6 6 6 1 0 5 6 3 6-1 0-4-4-5-6-8Z" />
+      <path
+        d="M20 24c1 6 0 9-3 12"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
+    </SvgIcon>
+  );
+}

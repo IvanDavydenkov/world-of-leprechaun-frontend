@@ -1,46 +1,104 @@
-# Getting Started with Create React App
+# World of Leprechaun VPN
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+Frontend личного кабинета VPN для домена `worldofleprechaun.ru`.
+Цель — предоставить пользователю доступ к своим VPN-конфигурациям и их загрузке.
+Сейчас реализованы основа приложения, адаптивная шапка с мобильным меню,
+основной layout и стартовый экран кабинета по маршруту `/`.
 
-## Available Scripts
+## Запуск
 
-In the project directory, you can run:
+Требуется Node.js 22.12+ (ветка 22) или 24+ и npm.
 
-### `npm start`
+```sh
+npm ci
+npm run dev
+```
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+Адрес dev-сервера выводится в терминале (по умолчанию http://localhost:5173).
+`npm start` также запускает Vite.
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+## Проверки и сборка
 
-### `npm test`
+```sh
+npm run typecheck
+npm test
+npm run build
+npm run preview
+```
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+`npm run test:watch` запускает Vitest в watch-режиме. Production-файлы находятся
+в `dist`. При хостинге SPA нужно настроить fallback на `index.html` для маршрутов
+приложения. DNS, хостинг и API ещё не настроены.
 
-### `npm run build`
+## Развёртывание через Docker
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+На сервере нужны только Docker Engine и Docker Compose v2. Node.js и Nginx
+устанавливаются внутри образа. Из корня скопированного проекта выполните:
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+```sh
+docker compose up -d --build
+docker compose ps
+```
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+Приложение доступно по `http://IP_СЕРВЕРА` на порту 80. Перед запуском убедитесь,
+что порт свободен и разрешён в firewall сервера. Для домена `worldofleprechaun.ru`
+направьте DNS-запись A на IPv4 сервера; AAAA добавляйте только при настроенном IPv6.
+Этот Compose запускает HTTP; сертификат и HTTPS настраиваются отдельно на reverse proxy.
 
-### `npm run eject`
+Порт и адрес привязки можно изменить в файле `.env` рядом с `compose.yaml`:
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+```dotenv
+HTTP_PORT=8080
+HTTP_BIND_ADDRESS=127.0.0.1
+```
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+Такой вариант подходит для уже установленного на сервере reverse proxy:
+он направляет запросы на `http://127.0.0.1:8080`. По умолчанию контейнер доступен
+на всех интерфейсах на порту 80. После изменения `.env` повторите команду запуска.
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+Обновление после получения нового кода, просмотр логов и остановка:
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+```sh
+docker compose up -d --build
+docker compose logs -f --tail=100 frontend
+docker compose down
+```
 
-## Learn More
+Сборка выполняет `npm ci` по lock-файлу и production-сборку Vite с проверкой типов.
+В финальном образе остаются Nginx и готовые статические файлы.
+Nginx поддерживает прямое открытие маршрутов SPA; отсутствующие файлы `/assets/`
+возвращают 404. HTML перепроверяется при загрузке, хешированные assets кешируются.
+Healthcheck проверяет `/healthz`; после перезапуска Docker сервис запускается снова,
+если не был остановлен вручную. Статус unhealthy сам по себе контейнер не перезапускает.
+Исходники не монтируются: для применения изменений требуется пересборка.
+Секреты и локальные `.env` исключены из контекста сборки; настройки Compose
+не становятся переменными frontend. Браузерные Vite-настройки задаются при сборке
+и не должны содержать секретов.
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+## Стек
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+React, TypeScript, Vite, Redux Toolkit / React Redux, RTK Query (в составе
+Redux Toolkit), React Router (`react-router-dom`), Zod, Material UI / Emotion.
+Тесты: Vitest, jsdom, React Testing Library.
+
+Redux Provider и тема MUI подключены. API endpoints, формы, авторизация и загрузка
+конфигов пока не реализованы; Zod установлен для будущих форм.
+
+## Структура FSD
+
+```text
+src/
+  app/        # композиция приложения, провайдеры, store, router, тема
+  pages/      # страницы; home — стартовый экран кабинета
+  widgets/    # составные блоки интерфейса
+  features/   # пользовательские действия
+  entities/   # бизнес-сущности
+  shared/     # переиспользуемый код
+  main.tsx    # точка входа
+```
+
+Импорты направлены вниз по слоям, доступ к слайсам — через публичные `index.ts`.
+Имена файлов и папок — `kebab-case`, включая React-компоненты (`home-page.tsx`).
+Стандартные имена `README.md`, `AGENTS.md`, `SKILL.md` сохраняются.
+Пустые слои сохранены через `.gitkeep`; сегменты добавляются по необходимости.
+Ограничения и процесс разработки описаны в `openspec/config.yaml` и `AGENTS.md`.

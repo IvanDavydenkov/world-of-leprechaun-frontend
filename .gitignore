@@ -10,8 +10,14 @@
 
 # production
 /build
+/dist
+*.tsbuildinfo
 
 # misc
+.idea/
+.env
+.env.*
+!.env.example
 .DS_Store
 .env.local
 .env.development.local
