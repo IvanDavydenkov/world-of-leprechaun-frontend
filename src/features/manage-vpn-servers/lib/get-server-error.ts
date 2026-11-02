@@ -1,4 +1,9 @@
 export function getServerError(error: unknown): string {
+  const data = error && typeof error === "object" && "data" in error ? error.data : undefined;
+  const code = data && typeof data === "object" && "error" in data ? data.error : undefined;
+  if (code === "server_identity_locked") return "Установка уже используется. Для другого хоста или установки создайте новую запись сервера.";
+  if (code === "server_busy") return "Сервер занят операцией. Дождитесь её завершения.";
+  if (code === "public_host_required") return "Укажите публичный хост VPN-сервера.";
   const status = error && typeof error === "object" && "status" in error ? error.status : undefined;
   switch (status) {
     case 400: return "Сервер отклонил данные. Проверьте поля формы.";

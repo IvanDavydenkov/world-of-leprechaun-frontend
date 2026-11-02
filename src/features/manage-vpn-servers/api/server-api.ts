@@ -48,8 +48,10 @@ const serverApi = baseApi.injectEndpoints({
         // Не возвращаем meta/произвольное тело ошибки: оно может содержать ввод.
         if (response.error) {
           const status = response.error.status;
+          const errorData = response.error.data;
+          const code = errorData && typeof errorData === "object" && "error" in errorData && typeof errorData.error === "string" && ["revision_conflict", "server_identity_locked", "server_busy", "public_host_required"].includes(errorData.error) ? errorData.error : undefined;
           return typeof status === "number"
-            ? { error: { status, data: null } }
+            ? { error: { status, data: code ? { error: code } : null } }
             : { error: { status: "CUSTOM_ERROR", error: "Не удалось подтвердить сохранение" } };
         }
         const parsed = serverSchema.safeParse(response.data);

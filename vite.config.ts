@@ -34,6 +34,7 @@ export default defineConfig(({ mode }) => {
         "^/me(?:/|\\?|$)": { target },
         "^/admin/users(?:/|\\?|$)": { target },
         "^/admin/vpn-servers(?:/|\\?|$)": { target },
+        "^/admin/vpn-(?:routing|switches|revocations|server-operations)(?:/|\\?|$)": { target },
         "/auth/logout": { target },
         "/auth/yandex/": oauthProxy,
       },

@@ -4,7 +4,7 @@ import { apiBaseUrl } from "./api-config";
 
 export const baseApi = createApi({
   reducerPath: "api",
-  tagTypes: ["Users", "Session", "MyConfigs", "VpnServers"],
+  tagTypes: ["Users", "Session", "MyConfigs", "VpnServers", "VpnRouting", "ServerOperations"],
   baseQuery: fetchBaseQuery({
     baseUrl: apiBaseUrl,
     credentials: "include",

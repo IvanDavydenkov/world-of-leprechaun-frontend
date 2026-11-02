@@ -4,6 +4,8 @@ import { useGetVpnServersQuery, useLazyGetVpnServerQuery } from "../api/server-a
 import type { VpnServer } from "../model/server-schema";
 import { getServerError } from "../lib/get-server-error";
 import { ServerForm } from "./server-form";
+import { useGetVpnRoutingQuery } from "../api/migration-api";
+import { MigrationControls } from "./migration-controls";
 
 export function ManageVpnServers({ onClose }: { onClose: () => void }) {
   const { currentData: servers, isFetching, error, refetch } = useGetVpnServersQuery(undefined, { refetchOnMountOrArgChange: true });
@@ -14,6 +16,7 @@ export function ManageVpnServers({ onClose }: { onClose: () => void }) {
   const [detailError, setDetailError] = useState<unknown>(null);
   const [saved, setSaved] = useState(false);
   const [formKey, setFormKey] = useState(0);
+  const routing = useGetVpnRoutingQuery(undefined, { refetchOnMountOrArgChange: true, refetchOnFocus: true });
 
   async function edit(id: string) {
     setDetailError(null);
@@ -35,7 +38,7 @@ export function ManageVpnServers({ onClose }: { onClose: () => void }) {
         {(isFetching || loadingServer) && <LinearProgress aria-label="Загрузка серверов" sx={{ mb: 2 }} />}
         {detailError != null && <Alert severity="error" sx={{ mb: 2 }}>{getServerError(detailError)}</Alert>}
         {editing ? (
-          <ServerForm key={formKey} server={selected} onBusy={setBusy}
+          <ServerForm key={formKey} server={selected} modern={!!routing.currentData?.features.prepare && !routing.error} onBusy={setBusy}
             onReload={() => { if (selected) void edit(selected.id); }}
             onBack={() => { setEditing(false); setSelected(null); setDetailError(null); void refetch(); }}
             onSaved={() => { setEditing(false); setSelected(null); setSaved(true); }} />
@@ -58,7 +61,7 @@ export function ManageVpnServers({ onClose }: { onClose: () => void }) {
                       <Box sx={{ minWidth: 0, overflowWrap: "anywhere" }}>
                         <Typography component="h3" sx={{ fontWeight: 500 }}>{server.name}</Typography>
                         <Typography color="text.secondary" sx={{ fontSize: 13, mt: 0.5 }}>SSH: {server.ssh_address} · {server.ssh_username}</Typography>
-                        <Typography color="text.secondary" sx={{ fontSize: 13 }}>VPN: {server.public_endpoint}</Typography>
+                        <Typography color="text.secondary" sx={{ fontSize: 13 }}>VPN: {server.public_endpoint || "Будет определён"}</Typography>
                         <Typography color="text.secondary" sx={{ fontSize: 12 }}>Версия {server.revision} · {server.container} / {server.interface}</Typography>
                       </Box>
                       <Button disabled={loadingServer || isFetching} onClick={() => void edit(server.id)} aria-label={`Настроить ${server.name}`} sx={{ minHeight: 44, alignSelf: { sm: "center" }, flexShrink: 0 }}>Настроить</Button>
@@ -67,6 +70,7 @@ export function ManageVpnServers({ onClose }: { onClose: () => void }) {
                 ))}
               </Stack>
             )}
+            <MigrationControls routing={!routing.error ? routing.currentData : undefined} routingError={routing.error} servers={servers || []} refresh={() => { void refetch(); void routing.refetch(); }} />
           </>
         )}
       </DialogContent>

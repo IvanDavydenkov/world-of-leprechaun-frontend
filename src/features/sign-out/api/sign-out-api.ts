@@ -1,4 +1,4 @@
-import { baseApi } from "../../../shared/api";
+import { baseApi, clearPrivateSessionState } from "../../../shared/api";
 
 const signOutApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
@@ -9,7 +9,7 @@ const signOutApi = baseApi.injectEndpoints({
         headers: { Accept: "application/json" },
         responseHandler: "text",
       }),
-      transformResponse: () => undefined,
+      transformResponse: () => { clearPrivateSessionState(); return undefined; },
     }),
   }),
 });

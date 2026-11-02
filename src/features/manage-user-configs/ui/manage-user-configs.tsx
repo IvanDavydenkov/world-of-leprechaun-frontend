@@ -254,7 +254,7 @@ export function ManageUserConfigs({ user }: { user: UserOverview }) {
                   : confirmation.kind === "single"
                     ? "Отключить выбранный конфиг пользователя?"
                     : `Отключить выбранные конфиги: ${confirmation.kind === "selected" ? confirmation.configIds.length : 0}?`}{" "}
-                Доступ будет отозван. История сохранится.
+                Доступ будет отозван на всех серверах. История сохранится.
               </Typography>
               <Stack direction="row" spacing={1} sx={{ mt: 1 }}>
                 <Button
