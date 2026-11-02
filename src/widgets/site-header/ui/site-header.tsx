@@ -16,6 +16,7 @@ import { BrandMark } from "../../../shared/ui/brand-mark";
 import { useGetSessionQuery } from "../../../entities/session";
 import { SignOutButton } from "../../../features/sign-out";
 import { ManageVpnServers } from "../../../features/manage-vpn-servers";
+import { ConfigUpdateNotice } from "./config-update-notice";
 
 const navigation = [
   { label: "Личный кабинет", href: "/" },
@@ -206,6 +207,7 @@ export function SiteHeader() {
           )}
         </Stack>
       </Container>
+      {session && <ConfigUpdateNotice key={session.id} userId={session.id} />}
       {isAdmin && serversOpen && <ManageVpnServers onClose={() => setServersOpen(false)} />}
       {isAdmin && (
         <Drawer
